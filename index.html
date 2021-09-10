@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversão de moedas</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h4>Conversor de moedas (API HGBrasil Finance)</h4>
+    <form>
+        <table>
+            <tr>
+                <td><label>Real (R$)</label></td>
+                <td><input type="number" id="campo_real" value="" /></td>
+            </tr>
+            <tr>
+                <td><label>Dólar (US$)</label></td>
+                <td><input type="number" id="campo_dolar" value="" /></td>
+            </tr>
+            <tr>
+                <td><label>Euro (€$)</label></td>
+                <td><input type="number" id="campo_euro" value="" /></td>
+            </tr>
+            <tr>
+                <td><label>Bitcoin (BTC)</label></td>
+                <td><input type="number" id="campo_btc" value="" /></td>
+            </tr>
+        </table>
+    </form>
+    
+    <script>
+        let valorDolar, valorEuro, valorBtc;
+        
+        function acessarAPI(url) {
+            let request = new XMLHttpRequest();
+            request.open("GET", url, false);
+            request.setRequestHeader("Content-type", "application/json");
+            request.send();
+            return request.responseText;
+        }
+
+        function carregarDadosAPI() {
+            let dados = acessarAPI("https://api.hgbrasil.com/finance?format=json-cors&key=801a9dce");
+            let cotacoes = JSON.parse(dados);
+            valorDolar = cotacoes.results["currencies"]["USD"].buy;
+            valorEuro = cotacoes.results["currencies"]["EUR"].buy;
+            valorBtc = cotacoes.results["currencies"]["BTC"].buy;
+        }
+
+        let campoReal = document.getElementById("campo_real");
+        let campoDolar = document.getElementById("campo_dolar");
+        let campoEuro = document.getElementById("campo_euro");
+        let campoBtc = document.getElementById("campo_btc");
+
+        campoReal.onkeyup = function(){
+            carregarDadosAPI();
+            campoDolar.value = (this.value / valorDolar).toFixed(2);
+            campoEuro.value = (this.value / valorEuro).toFixed(2);
+            campoBtc.value = (this.value / valorBtc).toFixed(10);
+        };
+
+        campoDolar.onkeyup = function(){
+            carregarDadosAPI();
+            campoReal.value = (this.value * valorDolar).toFixed(2);
+            campoEuro.value = (this.value * valorDolar / valorEuro).toFixed(2);
+            campoBtc.value = (this.value * valorDolar / valorBtc).toFixed(10);
+        };
+
+        campoEuro.onkeyup = function(){
+            carregarDadosAPI();
+            campoReal.value = (this.value * valorEuro).toFixed(2);
+            campoDolar.value = (this.value * valorEuro / valorDolar).toFixed(2);
+            campoBtc.value = (this.value * valorEuro / valorBtc).toFixed(10);
+        };
+
+        campoBtc.onkeyup = function(){
+            carregarDadosAPI();
+            campoReal.value = (this.value * valorBtc).toFixed(2);
+            campoDolar.value = (this.value * valorBtc / valorDolar).toFixed(2);
+            campoEuro.value = (this.value * valorBtc / valorEuro).toFixed(2);
+        };
+    </script>
+</body>
+</html>
